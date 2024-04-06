@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 import webbrowser
 
 # URL of the JSON file
-url = "https://www.100percentpure.com/collections/new/products.json"
+url = ""
 
 def print_product_details(url):
     try:
