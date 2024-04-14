@@ -89,6 +89,6 @@ def main(url):
         open_cart_url(cart_url)
 
 # URL of the JSON file
-url = "https://littlesleepies.com/collections/vip-early-access/products.json"
+url = ""
 
 main(url)
