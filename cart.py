@@ -1,6 +1,7 @@
 import requests
-from urllib.parse import urlparse
-import webbrowser
+from urllib.parse import urlparse, quote
+import subprocess
+import sys
 
 def fetch_data(url):
     """
@@ -38,7 +39,8 @@ def get_cart_url(parsed_url, cart_items):
     Construct and return the cart URL with the selected items and discount code.
     """
     shop_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-    cart_url = f"{shop_url}/cart/" + ','.join(cart_items)+"?discount=LSVIP"
+    cart_items_encoded = ','.join([quote(f"{item}:1") for item in cart_items])  # Ensure each part is URL-encoded
+    cart_url = f"{shop_url}/cart/{cart_items_encoded}?discount=LSVIP"
     return cart_url
 
 def handle_cart_interaction(parsed_url):
@@ -48,7 +50,7 @@ def handle_cart_interaction(parsed_url):
     cart_items = []
     while True:
         user_variant_id = input("Enter the Variant ID you want to add to the cart: ")
-        cart_items.append(f"{user_variant_id}:1")
+        cart_items.append(user_variant_id.strip())
 
         add_more = input("Do you want to add more variants? (yes/no): ").lower()
         if add_more != 'yes':
@@ -58,10 +60,20 @@ def handle_cart_interaction(parsed_url):
 
 def open_cart_url(cart_url):
     """
-    Ask the user if they want to open the cart URL in a browser.
+    Automatically opens the cart URL in a browser's incognito mode without user input.
     """
-    open_in_browser = input("Do you want to open the cart in your browser? (yes/no): ").lower()
-    if open_in_browser == 'yes':
+    # Open the browser in incognito mode
+    if sys.platform == 'win32':
+        # Windows
+        subprocess.Popen(['start', 'chrome', '--incognito', cart_url], shell=True)
+    elif sys.platform == 'darwin':
+        # macOS
+        subprocess.Popen(['open', '-na', 'Google Chrome', '--args', '--incognito', cart_url])
+    elif sys.platform == 'linux' or sys.platform == 'linux2':
+        # Linux
+        subprocess.Popen(['google-chrome', '--incognito', cart_url])
+    else:
+        # If not recognized or supported, just open without incognito
         webbrowser.open_new(cart_url)
 
 def main(url):
@@ -77,6 +89,6 @@ def main(url):
         open_cart_url(cart_url)
 
 # URL of the JSON file
-url = ""
+url = "https://littlesleepies.com/collections/vip-early-access/products.json"
 
 main(url)
